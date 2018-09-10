@@ -1,0 +1,2 @@
+ErroMedioTreino, ErroMedioTeste 
+1.0, 0.9256344594030497
