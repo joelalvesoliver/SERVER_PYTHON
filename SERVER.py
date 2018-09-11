@@ -50,6 +50,7 @@ classifierTree = DecisionTreeRegressor(max_depth=500,min_samples_split=2, random
 execult = [];
 tamanho = 0;
 txErro = [];
+real = [];
 classifier = classifierTree;
 
 
@@ -107,18 +108,18 @@ def treino():
     message = request.get_json(silent=True)
     nSolution = np.asarray(message["solucoes"])
     nObj = np.asarray(message["objetivos"])
-    processar = message["processar"]
+    #processar = message["processar"]
     #erro =message["erro"]
     
     
-    if processar == "treino":
-        tamanho = len(nSolution)
-        print(f'Tamanho: {tamanho}')
-        classifier = classifier.fit(nSolution, nObj);		
-    else:
-        ypredict = classifier.predict(nSolution)
-        lista = ypredict.tolist();
-    
+#    if processar == "treino":
+#        tamanho = len(nSolution)
+#        print(f'Tamanho: {tamanho}')
+#        classifier = classifier.fit(nSolution, nObj);		
+#    else:
+#        ypredict = classifier.predict(nSolution)
+#        lista = ypredict.tolist();
+    classifier = classifier.fit(nSolution, nObj);	
     
     
     
@@ -138,9 +139,10 @@ def save():
     message = request.get_json(silent=True)
     
     #salva o erro e o classificador
-    joblib.dump(classifier, "NOME.pkl")
-    #EscreveArquivo(execult, real,'Real.txt')
-    return message
+    joblib.dump(classifier, "TREE.pkl")
+    EscreveArquivo(execult, real,'Real1k.txt')
+    EscreveArquivo(execult, txErro,'Predito1k.txt')
+    return json.dumps({"retorno": []})
 
 """
 #################################### CLASSIFICA AS SOLUCOES ###############################################################
@@ -150,18 +152,26 @@ def save():
 def classifica():
     global classifier
     global txErro
+    global real 
+    global tamanho
     
     message = request.get_json(silent=True)
     nSolution = np.asarray(message["solucoes"]) #passa o numero de exemplos na posicao 0
     nObj = np.asarray(message["objetivos"]) #passa o numero de variaveis na posicao 0
-        
+    
+    #classifier = joblib.load("TREE30k.pkl")    
     y_predict = classifier.predict(nSolution)
     
-    #txErro.append(mean_squared_error(np.asarray(nObj),np.asarray(y_predictSVM)))
-    #txErro.append(1.0 - classifierSVM.score(np.asarray(nSolution), np.asarray(nObj)))
-            
-
+    i = 0
     
+    for valor in y_predict:
+        real.append(nObj[i])
+        txErro.append(y_predict[i])
+        execult.append(tamanho)
+        tamanho += 1
+        i+=1
+
+
     return json.dumps({"retorno": y_predict.tolist()})
 
 
